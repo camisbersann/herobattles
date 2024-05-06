@@ -48,6 +48,19 @@ app.get('/heroes/:filter', async (req, res) => {
     }
  })
 
+ app.post('/heroes', async (req, res) => {
+    try {
+        const { name, power, strenght } = req.body;
+
+        await pool.query('INSERT INTO heroes (name, power, strenght) VALUES ($1, $2, $3)', [name, power, strenght]);
+        res.status(201).send({ mensagem: 'Herói criado com sucesso!' });
+    }   catch (error) {
+        console.error('Erro ao criar herói', error);
+        res.status(500).json({ message: 'Erro ao criar herói' });
+    }
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
