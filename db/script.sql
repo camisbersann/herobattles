@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS battles (
     id SERIAL PRIMARY KEY,
     hero1_id INT NOT NULL,
     hero2_id INT NOT NULL,
-    winner INT NOT NULL,
+    winner INT,
     FOREIGN KEY (hero1_id) REFERENCES heroes(id),
     FOREIGN KEY (hero2_id) REFERENCES heroes(id)
 );
