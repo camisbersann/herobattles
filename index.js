@@ -31,6 +31,19 @@ app.get('/heroes', async (req, res) => {
     }
 });
 
+app.get('/battles', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM battles');
+        res.json({
+            total: result.rowCount,
+            battles: result.rows,
+        });
+    } catch (error) {
+       console.error('Erro ao obter todas as batalhas', error); 
+       res.status(500).send('Erro ao obter todas as batalhas');
+    }
+});
+
 app.get('/heroes/:filter', async (req, res) => {
     try {
         const { filter } = req.params;
