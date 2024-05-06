@@ -60,6 +60,18 @@ app.get('/heroes/:filter', async (req, res) => {
     }
 });
 
+app.put('/heroes/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, power, strenght } = req.body;
+
+        await pool.query('UPDATE heroes SET name = $1, power = $2, strenght = $3 WHERE id = $4', [name, power, strenght, id]);
+        res.status(201).send({mensagem: 'Herói atualizado com sucesso'});
+    } catch (error) {
+        console.error('Erro ao atualizar herói', error); 
+       res.status(500).send('Erro ao atualizar herói');
+    }
+});
 
 
 app.listen(PORT, () => {
