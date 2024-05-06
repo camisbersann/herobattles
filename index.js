@@ -73,6 +73,17 @@ app.put('/heroes/:id', async (req, res) => {
     }
 });
 
+app.delete('/heroes/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+         await pool.query('DELETE FROM heroes WHERE id = $1', [id]);
+        res.status(200).send({mensagem: 'Herói deletado com sucesso'});
+    } catch (error) {
+        console.error('Erro ao deletar herói', error); 
+       res.status(500).send('Erro ao deletar herói');
+    }
+});
+
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
