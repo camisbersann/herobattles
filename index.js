@@ -44,6 +44,42 @@ app.get('/battles', async (req, res) => {
     }
 });
 
+app.get('/battles/:hero1_id/:hero2_id', async (req, res) => {
+    try {
+        const { hero1_id, hero2_id } = req.params;
+
+        // Obter dados dos heróis
+        const result1 = await pool.query('SELECT * FROM heroes WHERE id = $1', [hero1_id]);
+        const result2 = await pool.query('SELECT * FROM heroes WHERE id = $1', [hero2_id]);
+        
+        const h1 = result1.rows[0];
+        const h2 = result2.rows[0];
+
+        let winner = -1;
+
+        if (h1.strenght > h2.strenght) {
+            winner = h1.id;
+        } else if (h2.strenght > h1.strenght) {
+            winner = h2.id;
+        }
+
+        // Inserir dados da batalha na tabela de batalhas
+        const battleInsertQuery = 'INSERT INTO battles (hero1_id, hero2_id, winner) VALUES ($1, $2, $3) RETURNING id';
+        const battleResult = await pool.query(battleInsertQuery, [hero1_id, hero2_id, winner]);
+
+        let winnerInfo;
+        if(winner != -1){
+            const winnerResult = await pool.query('SELECT * FROM heroes WHERE id = $1', [winner]);
+            winnerInfo = winnerResult.rows[0];
+        }
+
+        res.json({ winner: winner == -1 ? 'Empate' : winner, battle_id: battleResult.rows[0].id });
+    } catch (error) {
+        console.error('Erro ao batalhar', error);
+        res.status(500).json({ message: 'Erro ao batalhar' });
+    }
+});
+
 app.get('/heroes/:filter', async (req, res) => {
     try {
         const { filter } = req.params;
