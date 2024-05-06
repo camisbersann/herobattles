@@ -31,6 +31,24 @@ app.get('/heroes', async (req, res) => {
     }
 });
 
+app.get('/heroes/:filter', async (req, res) => {
+    try {
+        const { filter } = req.params;
+
+        if (isNaN(req.params.filter)){
+            const result = await pool.query('SELECT * FROM heroes WHERE name LIKE $1', [`%${filter}%`]);
+            res.status(200).json(result.rows[0]);
+        } else {
+            const result = await pool.query('SELECT * FROM heroes WHERE  = $1', [filter]);
+            res.status(200).json(result.rows[0]);
+        }
+    } catch (error) {
+         console.error('Erro ao obter herói pelo nome', error); 
+         res.status(500).send('Erro ao obter herói pelo nome');
+    }
+ })
+
+
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
