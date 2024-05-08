@@ -39,9 +39,13 @@ app.get('/battles', async (req, res) => {
         battles.winner AS vencedor, 
         heroes.name, 
         heroes.power, 
-        heroes.strenght 
+        heroes.strenght,
+        heroes.name,
+        heroes.power,
+        heroes.strenght
         FROM battles 
-        JOIN heroes ON battles.winner = heroes.id`);
+        LEFT JOIN 
+        heroes ON battles.hero1_id = heroes.id OR battles.hero2_id = heroes.id`)
         res.json({
             total: result.rowCount,
             battles: result.rows,
@@ -169,6 +173,17 @@ app.delete('/heroes/:id', async (req, res) => {
     } catch (error) {
         console.error('Erro ao deletar herói', error);
         res.status(500).send('Erro ao deletar herói');
+    }
+});
+
+app.delete('/battles/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM battles WHERE id = $1', [id]);
+        res.status(200).send({ mensagem: 'batalha deletado com sucesso' });
+    } catch (error) {
+        console.error('Erro ao deletar batalha', error);
+        res.status(500).send('Erro ao deletar batalha');
     }
 });
 
