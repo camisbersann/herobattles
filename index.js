@@ -33,7 +33,15 @@ app.get('/heroes', async (req, res) => {
 
 app.get('/battles', async (req, res) => {
     try {
-        const result = await pool.query(`SELECT battles.id AS numero_batalha, battles.hero1_id AS id_heroi1, battles.hero2_id AS id_heroi2, battles.winner AS vencedor, heroes.name, heroes.power, heroes.strenght FROM battles JOIN heroes ON battles.winner = heroes.id`);
+        const result = await pool.query(`SELECT battles.id AS numero_batalha, 
+        battles.hero1_id AS id_heroi1, 
+        battles.hero2_id AS id_heroi2, 
+        battles.winner AS vencedor, 
+        heroes.name, 
+        heroes.power, 
+        heroes.strenght 
+        FROM battles 
+        JOIN heroes ON battles.winner = heroes.id`);
         res.json({
             total: result.rowCount,
             battles: result.rows,
@@ -86,6 +94,36 @@ app.get('/heroes/:filter', async (req, res) => {
 
         if (isNaN(req.params.filter)) {
             const result = await pool.query('SELECT * FROM heroes WHERE name LIKE $1', [`%${filter}%`]);
+            res.status(200).json(result.rows[0]);
+        } else {
+            const result = await pool.query('SELECT * FROM heroes WHERE  = $1', [filter]);
+            res.status(200).json(result.rows[0]);
+        }
+    } catch (error) {
+        console.error('Erro ao obter herói pelo nome', error);
+        res.status(500).send('Erro ao obter herói pelo nome');
+    }
+})
+
+app.get('/battles/:filter', async (req, res) => {
+    try {
+        const { filter } = req.params;
+
+        if (isNaN(req.params.filter)) {
+            const result = await pool.query(`SELECT 
+            heroes.id,
+            heroes.name,
+            heroes.power,
+            heroes.strenght,
+            COUNT(battles.id) AS total_batalhas
+        FROM 
+            heroes
+        LEFT JOIN 
+            battles ON heroes.id = battles.hero1_id OR heroes.id = battles.hero2_id
+        WHERE 
+            heroes.name LIKE $1
+            GROUP BY 
+    heroes.id, heroes.name, heroes.power, heroes.strenght`, [`%${filter}%`]);
             res.status(200).json(result.rows[0]);
         } else {
             const result = await pool.query('SELECT * FROM heroes WHERE  = $1', [filter]);
