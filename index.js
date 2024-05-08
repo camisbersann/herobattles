@@ -2,7 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 
 const app = express();
-const PORT= 4000;
+const PORT = 4001;
 
 const pool = new Pool({
     user: 'postgres',
@@ -26,21 +26,21 @@ app.get('/heroes', async (req, res) => {
             heroes: result.rows,
         });
     } catch (error) {
-       console.error('Erro ao obter todos os heróis', error); 
-       res.status(500).send('Erro ao obter todos os heróis');
+        console.error('Erro ao obter todos os heróis', error);
+        res.status(500).send('Erro ao obter todos os heróis');
     }
 });
 
 app.get('/battles', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM battles');
+        const result = await pool.query(`SELECT battles.id AS numero_batalha, battles.hero1_id AS id_heroi1, battles.hero2_id AS id_heroi2, battles.winner AS vencedor, heroes.name, heroes.power, heroes.strenght FROM battles JOIN heroes ON battles.winner = heroes.id`);
         res.json({
             total: result.rowCount,
             battles: result.rows,
         });
     } catch (error) {
-       console.error('Erro ao obter todas as batalhas', error); 
-       res.status(500).send('Erro ao obter todas as batalhas');
+        console.error('Erro ao obter todas as batalhas', error);
+        res.status(500).send('Erro ao obter todas as batalhas');
     }
 });
 
@@ -51,7 +51,7 @@ app.get('/battles/:hero1_id/:hero2_id', async (req, res) => {
         // Obter dados dos heróis
         const result1 = await pool.query('SELECT * FROM heroes WHERE id = $1', [hero1_id]);
         const result2 = await pool.query('SELECT * FROM heroes WHERE id = $1', [hero2_id]);
-        
+
         const h1 = result1.rows[0];
         const h2 = result2.rows[0];
 
@@ -68,7 +68,7 @@ app.get('/battles/:hero1_id/:hero2_id', async (req, res) => {
         const battleResult = await pool.query(battleInsertQuery, [hero1_id, hero2_id, winner]);
 
         let winnerInfo;
-        if(winner != -1){
+        if (winner != -1) {
             const winnerResult = await pool.query('SELECT * FROM heroes WHERE id = $1', [winner]);
             winnerInfo = winnerResult.rows[0];
         }
@@ -84,7 +84,7 @@ app.get('/heroes/:filter', async (req, res) => {
     try {
         const { filter } = req.params;
 
-        if (isNaN(req.params.filter)){
+        if (isNaN(req.params.filter)) {
             const result = await pool.query('SELECT * FROM heroes WHERE name LIKE $1', [`%${filter}%`]);
             res.status(200).json(result.rows[0]);
         } else {
@@ -92,18 +92,19 @@ app.get('/heroes/:filter', async (req, res) => {
             res.status(200).json(result.rows[0]);
         }
     } catch (error) {
-         console.error('Erro ao obter herói pelo nome', error); 
-         res.status(500).send('Erro ao obter herói pelo nome');
+        console.error('Erro ao obter herói pelo nome', error);
+        res.status(500).send('Erro ao obter herói pelo nome');
     }
- })
+})
 
- app.post('/heroes', async (req, res) => {
+
+app.post('/heroes', async (req, res) => {
     try {
         const { name, power, strenght } = req.body;
 
         await pool.query('INSERT INTO heroes (name, power, strenght) VALUES ($1, $2, $3)', [name, power, strenght]);
         res.status(201).send({ mensagem: 'Herói criado com sucesso!' });
-    }   catch (error) {
+    } catch (error) {
         console.error('Erro ao criar herói', error);
         res.status(500).json({ message: 'Erro ao criar herói' });
     }
@@ -115,21 +116,21 @@ app.put('/heroes/:id', async (req, res) => {
         const { name, power, strenght } = req.body;
 
         await pool.query('UPDATE heroes SET name = $1, power = $2, strenght = $3 WHERE id = $4', [name, power, strenght, id]);
-        res.status(201).send({mensagem: 'Herói atualizado com sucesso'});
+        res.status(201).send({ mensagem: 'Herói atualizado com sucesso' });
     } catch (error) {
-        console.error('Erro ao atualizar herói', error); 
-       res.status(500).send('Erro ao atualizar herói');
+        console.error('Erro ao atualizar herói', error);
+        res.status(500).send('Erro ao atualizar herói');
     }
 });
 
 app.delete('/heroes/:id', async (req, res) => {
     try {
         const { id } = req.params;
-         await pool.query('DELETE FROM heroes WHERE id = $1', [id]);
-        res.status(200).send({mensagem: 'Herói deletado com sucesso'});
+        await pool.query('DELETE FROM heroes WHERE id = $1', [id]);
+        res.status(200).send({ mensagem: 'Herói deletado com sucesso' });
     } catch (error) {
-        console.error('Erro ao deletar herói', error); 
-       res.status(500).send('Erro ao deletar herói');
+        console.error('Erro ao deletar herói', error);
+        res.status(500).send('Erro ao deletar herói');
     }
 });
 
