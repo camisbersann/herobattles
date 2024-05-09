@@ -129,10 +129,10 @@ app.get('/battles/:filter', async (req, res) => {
             heroes.name LIKE $1
             GROUP BY 
     heroes.id, heroes.name, heroes.power, heroes.strenght`, [`%${filter}%`]);
-            res.status(200).json(result.rows[0]);
+            res.status(200).json(result.rows);
         } else {
             const result = await pool.query('SELECT * FROM heroes WHERE  = $1', [filter]);
-            res.status(200).json(result.rows[0]);
+            res.status(200).json(result.rows);
         }
     } catch (error) {
         console.error('Erro ao obter herói pelo nome', error);
