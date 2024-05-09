@@ -9,7 +9,7 @@ const pool = new Pool({
     host: 'localhost',
     database: 'herobattles',
     password: 'ds564',
-    port: 5432,
+    port: 5432, //7007
 });
 
 app.use(express.json());
