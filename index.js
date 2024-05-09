@@ -9,7 +9,7 @@ const pool = new Pool({
     host: 'localhost',
     database: 'herobattles',
     password: 'ds564',
-    port: 7007,
+    port: 5432,
 });
 
 app.use(express.json());
@@ -96,18 +96,19 @@ app.get('/heroes/:filter', async (req, res) => {
     try {
         const { filter } = req.params;
 
-        if (isNaN(req.params.filter)) {
+        if (isNaN(filter)) {
             const result = await pool.query('SELECT * FROM heroes WHERE name LIKE $1', [`%${filter}%`]);
-            res.status(200).json(result.rows[0]);
+            res.status(200).json(result.rows);
         } else {
-            const result = await pool.query('SELECT * FROM heroes WHERE  = $1', [filter]);
-            res.status(200).json(result.rows[0]);
+            const result = await pool.query('SELECT * FROM heroes WHERE id = $1', [filter]);
+            res.status(200).json(result.rows);
         }
     } catch (error) {
-        console.error('Erro ao obter herói pelo nome', error);
-        res.status(500).send('Erro ao obter herói pelo nome');
+        console.error('Erro ao obter heróis', error);
+        res.status(500).send('Erro ao obter heróis');
     }
 })
+
 
 app.get('/battles/:filter', async (req, res) => {
     try {
